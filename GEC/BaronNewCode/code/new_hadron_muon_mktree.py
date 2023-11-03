@@ -44,7 +44,7 @@ def isFV(x, y, z):
     inDeadRegion=False
     for i in [-3, -2, -1, 0, 1, 2, 3] :
         cathode_center=i*102.1
-        if (x>cathode_center-0.75) and (x<cathode_center+0.75):inDeadRegion=True 
+        if (x>cathode_center-0.75) and (x<cathode_center+0.75):inDeadRegion=True
         module_boundary=i*102.1+51.05
         if (i<=2) and (x>module_boundary-1.3) and (x<module_boundary+1.3):inDeadRegion=True
     for i in [1, 2, 3, 4]:
@@ -68,10 +68,10 @@ treeVarsToRead=['isCC',
                 #'LepE',
                 "LepPDG",
                 'LepMomX',
-                'LepMomY', 
+                'LepMomY',
                 'LepMomZ',
                 #'NuMomX',
-                #'NuMomY', 
+                #'NuMomY',
                 #'NuMomZ',
                 'vtx_x',
                 'vtx_y',
@@ -131,12 +131,12 @@ def processFiles(f):
     #f is only 1 file, each file get assigned to a different cpu
     #for f in f_list :
         print(f)
-        output="/storage/shared/barwu/10thTry/combined1/"+argv[1]+"/"+splitext(basename(f))[0]+"_Eff.root"
+        output="/home/fyguo/testbaroncode/"+argv[1]+"/"+splitext(basename(f))[0]+"_Eff.root"
         #output="/home/barwu/repos/MuonEffNN/10thtry/placeholder/"+splitext(basename(f))[0]+"_MuonEff.root" #FD
         if exists(output)==True:
             #print("testing")
             return None
-        try: makedirs("/storage/shared/barwu/10thTry/combined1/"+argv[1])
+        try: makedirs("/home/fyguo/testbaroncode/"+argv[1])
         except(FileExistsError): pass
         try:
             # Get caf TTree
@@ -260,7 +260,7 @@ def processFiles(f):
 
                 decayToTranslated = [ thisV/np.linalg.norm(thisV) for thisV in decayToTranslated ]
                 phi_rot_vec = np.multiply(decayToTranslated, throw_phi[...,None])
-                    
+
                 this_px = CAF["LepMomX"][i_event]
                 this_py = CAF["LepMomY"][i_event]
                 this_pz = CAF["LepMomZ"][i_event]
@@ -380,7 +380,7 @@ def processFiles(f):
             #effs_selected=np.reciprocal(np.reciprocal(effs_contained)+np.reciprocal(effs_tracker))
 
             event_data=tree.mktree("event_data",{#'NuMomX':np.float64,
-                                                 #'NuMomY':np.float64, 
+                                                 #'NuMomY':np.float64,
                                                  #'NuMomZ':np.float64,
                                                  'isCC':np.int32,
                                                  'inFV':np.int32,

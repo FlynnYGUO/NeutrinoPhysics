@@ -44,6 +44,7 @@ int muon_cont, muon_tra, muon_sel, hadr, comb;
 double muon_cont_eff, muon_tra_eff, muon_sel_eff, hadr_eff, comb_eff;
 double x_pos, y_pos, z_pos, XLepMom, YLepMom, ZLepMom;
 double TotalMom, cos_angle, LongitudinalMom;
+double E_vis_true, ev;
 const char* list_of_directories[40]={"0mgsimple","0m","1.75m","2m","4m","5.75m","8m","9.75m","12m","13.75m","16m","17.75m","20m","21.75m","24m","25.75m","26.75m","28m",
 "28.25m","28.5m","0mgsimpleRHC","0mRHC","1.75mRHC","2mRHC","4mRHC","5.75mRHC","8mRHC","9.75mRHC","12mRHC","13.75mRHC","16mRHC","17.75mRHC","20mRHC","21.75mRHC","24mRHC",
 "25.75mRHC","26.75mRHC","28mRHC","28.25mRHC","28.5mRHC"};
@@ -58,7 +59,9 @@ Para pr[]= //position is in units of cm, momentum is in units of GeV/c, angle is
   {"LepMomZ", "GeV", true, -0.5, 7., &ZLepMom},
   {"TotMom", "GeV", false, 0., 7., &TotalMom},
   {"cos_LepNuAngle", "", false, 0., 1., &cos_angle},
-  {"LongMom", "GeV", false, -1., 7., &LongitudinalMom}
+  {"LongMom", "GeV", false, -1., 7., &LongitudinalMom},
+  // {"E_vis_true", "GeV", false, 0., 10., &E_vis_true},
+  // {"Ev", "GeV", true, 0., 10., &ev}
 };
 
 vector<Sel_type> br=
@@ -70,13 +73,13 @@ vector<Sel_type> br=
   Sel_type("combined", "combined_eff", false, &comb, &comb_eff)
 };
 
-void draw_histograms()
+void draw_histograms(double geoeff_cut)
 {
   char raw_path[99];
   char sel_path[99];
   char geo_path[99];
   memset(raw_path, 0, 99); //clear array each time
-  memset(sel_path, 0, 99); 
+  memset(sel_path, 0, 99);
   memset(geo_path, 0, 99);
   TFile* raw_files[9];
   TFile* sel_files[45];
@@ -91,27 +94,37 @@ void draw_histograms()
     for (Para item:pr)
     {
       const char *fd=item.field;
-      if (index<9)
-      {
-        sprintf(raw_path,"/storage/shared/barwu/10thTry/0m_histograms/0.1_eff_veto_cut/%s/raw_%s.root",fd,fd);
-        raw_files[int(index)]=new TFile(raw_path, "read");
-        raw_histograms[int(index)]=(TH1D*)raw_files[int(index)]->Get(Form("raw_%s",fd));
-      }
-      sprintf(sel_path,"/storage/shared/barwu/10thTry/0m_histograms/0.1_eff_veto_cut/%s/selection-cut_%s_%s.root",fd,dt,fd);
+      // if (index<9)
+      // {
+      //   sprintf(raw_path,"/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/0.005_eff_veto_cut/%s/raw_%s.root",fd,fd);
+      //   raw_files[int(index)]=new TFile(raw_path, "read");
+      //   raw_histograms[int(index)]=(TH1D*)raw_files[int(index)]->Get(Form("raw_%s",fd));
+      // }
+      sprintf(sel_path,"/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/%0.3f_eff_veto_cut/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd);
       sel_files[index]=new TFile(sel_path, "read");
       sel_histograms[index]=(TH1D*)sel_files[index]->Get(Form("selection-cut_%s_%s",dt,fd));
-      sprintf(geo_path,"/storage/shared/barwu/10thTry/0m_histograms/0.1_eff_veto_cut/%s/geo-corrected_%s_%s.root",fd,dt,fd);
+      sprintf(geo_path,"/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/%0.3f_eff_veto_cut/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd);
       geo_files[index]=new TFile(geo_path, "read");
       geo_histograms[index]=(TH1D*)geo_files[index]->Get(Form("geo-corrected_%s_%s",dt,fd));
       index++;
     }
   }
 
+  int index_raw = 0;
+  for (Para item:pr)
+  {
+    const char *fd=item.field;
+    sprintf(raw_path,"/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/%0.3f_eff_veto_cut/%s/raw_%s.root",geoeff_cut,fd,fd);
+    raw_files[index_raw]=new TFile(raw_path, "read");
+    raw_histograms[index_raw]=(TH1D*)raw_files[index_raw]->Get(Form("raw_%s",fd));
+    index_raw++;
+  }
+
   gStyle->SetOptStat(000000000);
   //gStyle->SetOptStat(111111111);
-  TCanvas *c=new TCanvas("c", "all graphs", 1800, 1000);
+  TCanvas *c=new TCanvas("c", "all graphs", 5400, 3000);
   c->Divide(9,5);
-  TCanvas *r=new TCanvas("r", "all ratios", 1800, 1000);
+  TCanvas *r=new TCanvas("r", "all ratios", 5400, 3000);
   r->Divide(9,5);
   index=0;
   for(auto sel:br)
@@ -148,7 +161,7 @@ void draw_histograms()
       hist3->GetXaxis()->SetTitle(Form("%s (%s)",fd,var_unit));
       hist3->GetYaxis()->SetTitle("# of events");
       TLegend *leg=new TLegend(0.1,0.77,0.4,0.9);
-      leg->SetHeader("comparison"); 
+      leg->SetHeader("comparison");
       leg->AddEntry(hist1, "raw distribution");
       leg->AddEntry(hist2, "selection-cut distribution");
       leg->AddEntry(hist3, "geo corrected distribution");
@@ -157,7 +170,7 @@ void draw_histograms()
       // TPaveStats *ps;
       // ps=(TPaveStats*)hist3->GetListOfFunctions()->FindObject("stats");
       // ps->SetFillStyle(0);
-      
+
       r->cd(index+1);
       TH1D *rplot1=(TH1D*)hist3->Clone();
       rplot1->Divide(hist1);
@@ -174,7 +187,7 @@ void draw_histograms()
       rplot3->SetLineColor(kCyan);
       rplot3->Draw("samehist");
       // TLegend *rleg=new TLegend(0.1,0.77,0.4,0.9);
-      // rleg->SetHeader("comparison"); 
+      // rleg->SetHeader("comparison");
       // rleg->AddEntry(rplot1, "geo vs raw");
       // rleg->AddEntry(rplot2, "sel vs raw");
       // rleg->AddEntry(rplot3, "sel vs geo");
@@ -183,12 +196,17 @@ void draw_histograms()
       // prs=(TPaveStats*)rplot->GetListOfFunctions()->FindObject("stats");
       // prs->SetFillStyle(0);
       index++;
+      cout << " index: " << index << endl;
     }
   }
+
+  // Create a folder before drawing plots
+  gSystem->mkdir(TString::Format("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/ratio_test/%.3f_eff_veto_cut", geoeff_cut), kTRUE);
+
   c->Update();
-  c->SaveAs("/home/barwu/repos/MuonEffNN/images/0m_PRISM_0.1_eff_veto_cut_all_hists_200_bins.png");
+  c->SaveAs(Form("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/ratio_test/%0.3f_eff_veto_cut/0mgsimple_PRISM_%0.3f_eff_veto_cut_all_hists_200_bins.png",geoeff_cut,geoeff_cut));
   r->Update();
-  r->SaveAs("/home/barwu/repos/MuonEffNN/images/0m_PRISM_0.1_eff_veto_cut_all_hists_200_bins_ratios.png");
+  r->SaveAs(Form("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/ratio_test/%0.3f_eff_veto_cut/0mgsimple_PRISM_%0.3f_eff_veto_cut_all_hists_200_bins_ratios.png",geoeff_cut,geoeff_cut));
 
   TCanvas *cs[5];
   TCanvas *rs[5];
@@ -197,9 +215,9 @@ void draw_histograms()
   for(auto sel:br)
   {
     const char *dt=sel.sel_name;
-    cs[i]=new TCanvas(Form("c%01d",i+1),dt,1800,1000);
+    cs[i]=new TCanvas(Form("c%01d",i+1),dt,5400, 3000);
     cs[i]->Divide(3,3);
-    rs[i]=new TCanvas(Form("r%01d",i+1),Form("%s ratios",dt),1800,1000);
+    rs[i]=new TCanvas(Form("r%01d",i+1),Form("%s ratios",dt),5400, 3000);
     rs[i]->Divide(3,3);
     for(int k=0;k<9;k++)
     {
@@ -232,7 +250,7 @@ void draw_histograms()
       hist3->GetXaxis()->SetTitle(Form("%s (%s)",fd,var_unit));
       hist3->GetYaxis()->SetTitle("# of events");
       TLegend *leg=new TLegend(0.1,0.75,0.33,0.9);
-      leg->SetHeader("comparison"); 
+      leg->SetHeader("comparison");
       leg->AddEntry(hist1, "raw distribution");
       leg->AddEntry(hist2, "selection-cut distribution");
       leg->AddEntry(hist3, "geo corrected distribution");
@@ -258,7 +276,7 @@ void draw_histograms()
       rplot3->SetLineColor(kCyan);
       rplot3->Draw("samehist");
       TLegend *rleg=new TLegend(0.1,0.77,0.4,0.9);
-      rleg->SetHeader("comparison"); 
+      rleg->SetHeader("comparison");
       rleg->AddEntry(rplot1, "geo vs raw");
       rleg->AddEntry(rplot2, "sel vs raw");
       rleg->AddEntry(rplot3, "sel vs geo");
@@ -269,9 +287,9 @@ void draw_histograms()
       index++;
     }
     cs[i]->Update();
-    cs[i]->SaveAs(Form("/home/barwu/repos/MuonEffNN/images/0m_%s_PRISM_0.1_eff_veto_cut_hists_200_bins.png",dt));
+    cs[i]->SaveAs(Form("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/ratio_test/%0.3f_eff_veto_cut/0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_hists_200_bins.png",geoeff_cut,dt,geoeff_cut));
     rs[i]->Update();
-    rs[i]->SaveAs(Form("/home/barwu/repos/MuonEffNN/images/0m_%s_PRISM_0.1_eff_veto_cut_hists_200_bins_ratios.png",dt));;
+    rs[i]->SaveAs(Form("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/ratio_test/%0.3f_eff_veto_cut/0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));;
     i++;
   }
 }
