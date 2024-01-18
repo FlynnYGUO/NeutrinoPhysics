@@ -51,8 +51,9 @@ export XRD_REDIRECTLIMIT=255
 export XRD_LOADBALANCERTTL=7200
 export XRD_STREAMTIMEOUT=14400 # may vary for your job/file type
 
-# Make sure the output directory exists
-ifdh ls $OUTDIR 0 # set recursion depth to 0 since we are only checking for the directory; we don't care about the full listing.
+# Comment the below out!!!
+# # Make sure the output directory exists
+# ifdh ls $OUTDIR 0 # set recursion depth to 0 since we are only checking for the directory; we don't care about the full listing.
 
 if [ $? -ne 0 ]; then
   # if ifdh ls failed, try to make the directory

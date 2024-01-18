@@ -21,8 +21,8 @@ pwd
 # Copy the untarred folder and remove the CVMFS linked read-only version
 # because recompile need to modify files
 # which can't be done in the CVMFS read-only version
-echo "git clone --recurse-submodules -b FD_Wei https://github.com/weishi10141993/DUNE_ND_GeoEff.git "
-git clone --recurse-submodules -b FD_Wei https://github.com/weishi10141993/DUNE_ND_GeoEff.git
+echo "git clone --recurse-submodules -b FD_Wei https://github.com/FlynnYGUO/DUNE_ND_GeoEff.git "
+git clone --recurse-submodules -b FD_Wei https://github.com/FlynnYGUO/DUNE_ND_GeoEff.git
 echo "cd ${_CONDOR_JOB_IWD}/DUNE_ND_GeoEff"
 cd ${_CONDOR_JOB_IWD}/DUNE_ND_GeoEff
 echo "source setup.sh"
