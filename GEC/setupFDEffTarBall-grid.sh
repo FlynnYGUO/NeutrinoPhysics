@@ -1,4 +1,9 @@
 #!/bin/bash
+echo "unsetup mrb"
+unsetup mrb
+# setup mrb v4_04_06
+echo "resetup mrb"
+setup mrb -o
 
 DIRECTORY=FDEff
 # we cannot rely on "whoami" in a grid job. We have no idea what the local username will be.
@@ -6,11 +11,14 @@ DIRECTORY=FDEff
 USERNAME=${GRID_USER}
 echo "Got username"
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+<<<<<<< HEAD
 echo "unsetup mrb"
 unsetup mrb
 # setup mrb v4_04_06
 echo "resetup mrb"
 setup mrb -o
+=======
+>>>>>>> 98296839050c17235a06fe4995070adc2451cfcd
 setup dunetpc v09_22_02 -q e19:debug # this also sets up the ifdh used in run_FDEffTarBall.sh
 echo "dunetpc is set"
 export WORKDIR=${_CONDOR_JOB_IWD} # if we use the RCDS the localProducts area will be placed in $CONDOR_DIR_INPUT
